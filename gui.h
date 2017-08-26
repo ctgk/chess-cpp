@@ -1,22 +1,26 @@
 #include <wx/wx.h>
+#include "board.h"
 
-class Board : public wxPanel
+class GUIBoard : public wxPanel
 {
 public:
-    Board(wxFrame *parent);
+    GUIBoard(wxFrame *parent, Board *chessboard);
 
 protected:
     void OnPaint(wxPaintEvent& event);
 
 private:
-    enum { BoardLength = 8 };
     int SquareLength();
-    void DrawSquare(wxPaintDC &dc, int x, int y);
+    void DrawSquare(wxPaintDC &dc, int x, int y, chessPiece piece);
+    void LoadImage();
     wxStatusBar *statusbar;
+    Board *board;
+    static const int boardLength = 8;
+    wxImage img[12];
 };
 
-class Window : public wxFrame
+class GUIWindow : public wxFrame
 {
 public:
-    Window(const wxString& title);
+    GUIWindow(const wxString& title);
 };

@@ -5,8 +5,9 @@ IMPLEMENT_APP(ChessApp)
 
 bool ChessApp::OnInit()
 {
-    Window *window = new Window(wxT("Chess"));
-    window->Show(true);
+    wxInitAllImageHandlers();
+    GUIWindow *guiwindow = new GUIWindow(wxT("Chess"));
+    guiwindow->Show(true);
 
     return true;
 }
