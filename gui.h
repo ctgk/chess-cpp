@@ -8,7 +8,7 @@ public:
     void PlaceAt(int ii, int jj) { i = ii; j = jj; }
     void Draw(wxDC& dc, int length);
     bool BeginMove(wxPoint pt, int length);
-    void FinishMove(int length);
+    void FinishMove(wxPoint pt, int length);
     void Move(wxPoint pt, int length);
 
 private:

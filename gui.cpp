@@ -39,11 +39,11 @@ bool ChessSymbol::BeginMove(wxPoint pt, int length)
     }
 }
 
-void ChessSymbol::FinishMove(int length)
+void ChessSymbol::FinishMove(wxPoint pt, int length)
 {
     if(dragging){
-        i = (x + length / 2) / length;
-        j = (y + length / 2) / length;
+        i = pt.x / length;
+        j = pt.y / length;
         dragging = false;
     }
 }
@@ -98,14 +98,17 @@ void GUIBoard::OnMouseDown(wxMouseEvent& event)
 void GUIBoard::OnMouseUp(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
-        symbol[i]->FinishMove(SquareLength());
+        symbol[i]->FinishMove(event.GetPosition(), SquareLength());
     }
     Refresh(true);
 }
 
 void GUIBoard::OnMove(wxMouseEvent& event)
 {
+    wxString str;
     wxPoint pt = ScreenToClient(wxGetMousePosition());
+    str.Printf(wxT("(x, y) = (%d, %d), length = %d"), pt.x, pt.y, SquareLength());
+    statusbar->SetStatusText(str);
     for(int i = 0; i < 32; i++){
         symbol[i]->Move(pt, SquareLength());
     }
