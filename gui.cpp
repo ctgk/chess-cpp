@@ -4,6 +4,7 @@ GUIBoard::GUIBoard(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
     board = chessboard;
+    boardLength = chessboard->Length;
     statusbar = parent->GetStatusBar();
     LoadImage();
     Connect(wxEVT_PAINT, wxPaintEventHandler(GUIBoard::OnPaint));
@@ -45,7 +46,13 @@ void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y, chessPiece piece)
     dc.DrawRectangle(x * SquareLength(), y * SquareLength(),
         SquareLength(), SquareLength());
     if (piece < 12){
-        dc.DrawBitmap(wxBitmap(img[piece].Scale(size, size)), x * SquareLength() + pos, y * SquareLength() + pos, false);
+        dc.DrawBitmap(
+            wxBitmap(
+                img[piece].Scale(size, size)),
+            x * SquareLength() + pos,
+            y * SquareLength() + pos,
+            false
+        );
     }
 }
 

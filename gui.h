@@ -15,7 +15,7 @@ private:
     void LoadImage();
     wxStatusBar *statusbar;
     Board *board;
-    static const int boardLength = 8;
+    int boardLength;
     wxImage img[12];
 };
 
