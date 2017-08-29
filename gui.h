@@ -8,7 +8,7 @@ public:
     void PlaceAt(int ii, int jj) { i = ii; j = jj; }
     void Draw(wxDC& dc, int length);
     bool BeginMove(wxPoint pt, int length);
-    void FinishMove() { dragging = false; }
+    void FinishMove(int length);
     void Move(wxPoint pt, int length);
 
 private:
@@ -25,6 +25,9 @@ public:
 
 protected:
     void OnPaint(wxPaintEvent& event);
+    void OnMouseDown(wxMouseEvent& event);
+    void OnMouseUp(wxMouseEvent& event);
+    void OnMove(wxMouseEvent& event);
 
 private:
     int SquareLength();

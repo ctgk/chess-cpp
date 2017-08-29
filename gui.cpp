@@ -9,11 +9,18 @@ ChessSymbol::ChessSymbol(const wxString path)
 void ChessSymbol::Draw(wxDC& dc, int length)
 {
     int size = length * 0.8;
-    int offset = length * 0.1;
-    dc.DrawBitmap(
-        wxBitmap(img.Scale(size, size)),
-        i * length + offset, j * length + offset, false
-    );
+    if(dragging){
+        dc.DrawBitmap(
+            wxBitmap(img.Scale(size, size)),
+            x, y, false
+        );
+    } else {
+        int offset = length * 0.1;
+        dc.DrawBitmap(
+            wxBitmap(img.Scale(size, size)),
+            i * length + offset, j * length + offset, false
+        );
+    }
 }
 
 bool ChessSymbol::BeginMove(wxPoint pt, int length)
@@ -32,6 +39,15 @@ bool ChessSymbol::BeginMove(wxPoint pt, int length)
     }
 }
 
+void ChessSymbol::FinishMove(int length)
+{
+    if(dragging){
+        i = (x + length / 2) / length;
+        j = (y + length / 2) / length;
+        dragging = false;
+    }
+}
+
 void ChessSymbol::Move(wxPoint pt, int length)
 {
     int size = length * 0.8;
@@ -47,9 +63,12 @@ GUIBoard::GUIBoard(wxFrame *parent, Board *chessboard)
     board = chessboard;
     boardLength = chessboard->Length;
     statusbar = parent->GetStatusBar();
-    // LoadImage();
     LoadPiece();
+
     Connect(wxEVT_PAINT, wxPaintEventHandler(GUIBoard::OnPaint));
+    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(GUIBoard::OnMouseDown));
+    Connect(wxEVT_LEFT_UP, wxMouseEventHandler(GUIBoard::OnMouseUp));
+    Connect(wxEVT_MOTION, wxMouseEventHandler(GUIBoard::OnMove));
 }
 
 void GUIBoard::OnPaint(wxPaintEvent& event)
@@ -65,6 +84,32 @@ void GUIBoard::OnPaint(wxPaintEvent& event)
     for (int i = 0; i < 32; i++){
         symbol[i]->Draw(dc, SquareLength());
     }
+}
+
+void GUIBoard::OnMouseDown(wxMouseEvent& event)
+{
+    for(int i = 0; i < 32; i++){
+        if(symbol[i]->BeginMove(event.GetPosition(), SquareLength())){
+            break;
+        }
+    }
+}
+
+void GUIBoard::OnMouseUp(wxMouseEvent& event)
+{
+    for(int i = 0; i < 32; i++){
+        symbol[i]->FinishMove(SquareLength());
+    }
+    Refresh(true);
+}
+
+void GUIBoard::OnMove(wxMouseEvent& event)
+{
+    wxPoint pt = ScreenToClient(wxGetMousePosition());
+    for(int i = 0; i < 32; i++){
+        symbol[i]->Move(pt, SquareLength());
+    }
+    Refresh(true);
 }
 
 int GUIBoard::SquareLength()
