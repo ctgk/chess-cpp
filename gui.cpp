@@ -1,12 +1,54 @@
 #include "gui.h"
 
+ChessSymbol::ChessSymbol(const wxString path)
+{
+    dragging = false;
+    img = wxImage(path, wxBITMAP_TYPE_ANY);
+}
+
+void ChessSymbol::Draw(wxDC& dc, int length)
+{
+    int size = length * 0.8;
+    int offset = length * 0.1;
+    dc.DrawBitmap(
+        wxBitmap(img.Scale(size, size)),
+        i * length + offset, j * length + offset, false
+    );
+}
+
+bool ChessSymbol::BeginMove(wxPoint pt, int length)
+{
+    int size = length * 0.8;
+    int offset = length * 0.1;
+    x = i * length + offset;
+    y = j * length + offset;
+    if(x <= pt.x && pt.x <= x + size && y <= pt.y && pt.y <= y + size){
+        x = pt.x - size / 2;
+        y = pt.y - size / 2;
+        dragging = true;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ChessSymbol::Move(wxPoint pt, int length)
+{
+    int size = length * 0.8;
+    if(dragging){
+        x = pt.x - size / 2;
+        y = pt.y - size / 2;
+    }
+}
+
 GUIBoard::GUIBoard(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
     board = chessboard;
     boardLength = chessboard->Length;
     statusbar = parent->GetStatusBar();
-    LoadImage();
+    // LoadImage();
+    LoadPiece();
     Connect(wxEVT_PAINT, wxPaintEventHandler(GUIBoard::OnPaint));
 }
 
@@ -16,8 +58,12 @@ void GUIBoard::OnPaint(wxPaintEvent& event)
 
     for (int i = 0; i < boardLength; i++){
         for (int j = 0; j < boardLength; j++){
-            DrawSquare(dc, i, j, board->PieceAt(i, j));
+            DrawSquare(dc, i, j);
         }
+    }
+
+    for (int i = 0; i < 32; i++){
+        symbol[i]->Draw(dc, SquareLength());
     }
 }
 
@@ -25,17 +71,15 @@ int GUIBoard::SquareLength()
 {
     int width = GetClientSize().GetWidth();
     int height = GetClientSize().GetHeight();
-    return std::min(width, height) / boardLength;
+    int length = std::min(width, height) / boardLength;
+    return length;
 }
 
-void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y, chessPiece piece)
+void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y)
 {
     static wxColor light = wxColor(255, 222, 173);
     static wxColor dark = wxColor(205, 133, 63);
     int boardtop = GetClientSize().GetHeight() - boardLength * SquareLength();
-    int size, pos;
-    size = SquareLength() * 0.8;
-    pos = SquareLength() * 0.1;
 
     dc.SetPen(*wxTRANSPARENT_PEN);
     if (x % 2 == y % 2){
@@ -45,34 +89,38 @@ void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y, chessPiece piece)
     }
     dc.DrawRectangle(x * SquareLength(), y * SquareLength(),
         SquareLength(), SquareLength());
-    if (piece < 12){
-        dc.DrawBitmap(
-            wxBitmap(
-                img[piece].Scale(size, size)),
-            x * SquareLength() + pos,
-            y * SquareLength() + pos,
-            false
-        );
+}
+
+void GUIBoard::LoadPiece()
+{
+    wxString path[12] = {
+        wxT("img/black_pawn.png"),
+        wxT("img/black_knight.png"),
+        wxT("img/black_bishop.png"),
+        wxT("img/black_rook.png"),
+        wxT("img/black_queen.png"),
+        wxT("img/black_king.png"),
+        wxT("img/white_pawn.png"),
+        wxT("img/white_knight.png"),
+        wxT("img/white_bishop.png"),
+        wxT("img/white_rook.png"),
+        wxT("img/white_queen.png"),
+        wxT("img/white_king.png")
+    };
+    int count = 0;
+    for(int i = 0; i < boardLength; i++){
+        for(int j = 0; j < boardLength; j++){
+            chessPiece piece = board->PieceAt(i, j);
+            if(piece < 12){
+                symbol[count] = new ChessSymbol(path[piece]);
+                symbol[count]->PlaceAt(i, j);
+                count++;
+            }
+        }
     }
 }
 
-void GUIBoard::LoadImage()
-{
-    img[0].LoadFile(wxT("img/black_pawn.png"), wxBITMAP_TYPE_PNG);
-    img[1].LoadFile(wxT("img/black_knight.png"), wxBITMAP_TYPE_PNG);
-    img[2].LoadFile(wxT("img/black_bishop.png"), wxBITMAP_TYPE_PNG);
-    img[3].LoadFile(wxT("img/black_rook.png"), wxBITMAP_TYPE_PNG);
-    img[4].LoadFile(wxT("img/black_queen.png"), wxBITMAP_TYPE_PNG);
-    img[5].LoadFile(wxT("img/black_king.png"), wxBITMAP_TYPE_PNG);
-    img[6].LoadFile(wxT("img/white_pawn.png"), wxBITMAP_TYPE_PNG);
-    img[7].LoadFile(wxT("img/white_knight.png"), wxBITMAP_TYPE_PNG);
-    img[8].LoadFile(wxT("img/white_bishop.png"), wxBITMAP_TYPE_PNG);
-    img[9].LoadFile(wxT("img/white_rook.png"), wxBITMAP_TYPE_PNG);
-    img[10].LoadFile(wxT("img/white_queen.png"), wxBITMAP_TYPE_PNG);
-    img[11].LoadFile(wxT("img/white_king.png"), wxBITMAP_TYPE_PNG);
-}
-
-GUIWindow::GUIWindow(const wxString& title)
+MyFrame::MyFrame(const wxString& title)
     : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500))
 {
     wxStatusBar *sb = CreateStatusBar();
