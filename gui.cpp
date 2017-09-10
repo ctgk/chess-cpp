@@ -2,6 +2,7 @@
 
 ChessSymbol::ChessSymbol(const wxString path)
 {
+    captured = false;
     dragging = false;
     img = wxImage(path, wxBITMAP_TYPE_ANY);
 }
@@ -16,7 +17,7 @@ void ChessSymbol::Draw(wxDC& dc, int length)
             wxBitmap(img.Scale(symbolSize, symbolSize)),
             pixelX, pixelY, false
         );
-    } else {
+    } else if(!captured){
         dc.DrawBitmap(
             wxBitmap(img.Scale(symbolSize, symbolSize)),
             boardX * length + spacingOffset, boardY * length + spacingOffset, false
@@ -26,6 +27,9 @@ void ChessSymbol::Draw(wxDC& dc, int length)
 
 bool ChessSymbol::BeginMove(wxPoint pt)
 {
+    if(captured){
+        return false;
+    }
     pixelX = boardX * spacingLength + spacingOffset;
     pixelY = boardY * spacingLength + spacingOffset;
     if(pixelX <= pt.x && pt.x <= pixelX + symbolSize && pixelY <= pt.y && pt.y <= pixelY + symbolSize){
@@ -96,7 +100,19 @@ void GUIBoard::OnMouseDown(wxMouseEvent& event)
 void GUIBoard::OnMouseUp(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
-        symbol[i]->FinishMove(event.GetPosition());
+        if (symbol[i]->isDragging()){
+            symbol[i]->FinishMove(event.GetPosition());
+            int targetX = symbol[i]->getBoardX();
+            int targetY = symbol[i]->getBoardY();
+
+            for(int j = 0; j < 32; j++){
+                if(j != i && targetX == symbol[j]->getBoardX() && targetY == symbol[j]->getBoardY()){
+                    symbol[j]->remove();
+                }
+            }
+
+            break;
+        }
     }
     Refresh(true);
 }

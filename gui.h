@@ -10,12 +10,17 @@ public:
     bool BeginMove(wxPoint pt);
     void FinishMove(wxPoint pt);
     void Move(wxPoint pt);
+    bool isDragging() { return dragging; }
+    int getBoardX() { return boardX; }
+    int getBoardY() { return boardY; }
+    void remove() { captured = true; }
 
 private:
     int spacingLength;
     int symbolSize;
     int spacingOffset;
     bool dragging;
+    bool captured;
     int boardX, boardY;
     int pixelX, pixelY;
     wxImage img;
