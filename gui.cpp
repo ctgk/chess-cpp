@@ -8,30 +8,29 @@ ChessSymbol::ChessSymbol(const wxString path)
 
 void ChessSymbol::Draw(wxDC& dc, int length)
 {
-    int size = length * 0.8;
+    spacingLength = length;
+    symbolSize = length * 0.8;
+    spacingOffset = length * 0.1;
     if(dragging){
         dc.DrawBitmap(
-            wxBitmap(img.Scale(size, size)),
-            x, y, false
+            wxBitmap(img.Scale(symbolSize, symbolSize)),
+            pixelX, pixelY, false
         );
     } else {
-        int offset = length * 0.1;
         dc.DrawBitmap(
-            wxBitmap(img.Scale(size, size)),
-            i * length + offset, j * length + offset, false
+            wxBitmap(img.Scale(symbolSize, symbolSize)),
+            boardX * length + spacingOffset, boardY * length + spacingOffset, false
         );
     }
 }
 
-bool ChessSymbol::BeginMove(wxPoint pt, int length)
+bool ChessSymbol::BeginMove(wxPoint pt)
 {
-    int size = length * 0.8;
-    int offset = length * 0.1;
-    x = i * length + offset;
-    y = j * length + offset;
-    if(x <= pt.x && pt.x <= x + size && y <= pt.y && pt.y <= y + size){
-        x = pt.x - size / 2;
-        y = pt.y - size / 2;
+    pixelX = boardX * spacingLength + spacingOffset;
+    pixelY = boardY * spacingLength + spacingOffset;
+    if(pixelX <= pt.x && pt.x <= pixelX + symbolSize && pixelY <= pt.y && pt.y <= pixelY + symbolSize){
+        pixelX = pt.x - symbolSize / 2;
+        pixelY = pt.y - symbolSize / 2;
         dragging = true;
         return true;
     } else {
@@ -39,21 +38,20 @@ bool ChessSymbol::BeginMove(wxPoint pt, int length)
     }
 }
 
-void ChessSymbol::FinishMove(wxPoint pt, int length)
+void ChessSymbol::FinishMove(wxPoint pt)
 {
     if(dragging){
-        i = pt.x / length;
-        j = pt.y / length;
+        boardX = pt.x / spacingLength;
+        boardY = pt.y / spacingLength;
         dragging = false;
     }
 }
 
-void ChessSymbol::Move(wxPoint pt, int length)
+void ChessSymbol::Move(wxPoint pt)
 {
-    int size = length * 0.8;
     if(dragging){
-        x = pt.x - size / 2;
-        y = pt.y - size / 2;
+        pixelX = pt.x - symbolSize / 2;
+        pixelY = pt.y - symbolSize / 2;
     }
 }
 
@@ -89,7 +87,7 @@ void GUIBoard::OnPaint(wxPaintEvent& event)
 void GUIBoard::OnMouseDown(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
-        if(symbol[i]->BeginMove(event.GetPosition(), SquareLength())){
+        if(symbol[i]->BeginMove(event.GetPosition())){
             break;
         }
     }
@@ -98,7 +96,7 @@ void GUIBoard::OnMouseDown(wxMouseEvent& event)
 void GUIBoard::OnMouseUp(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
-        symbol[i]->FinishMove(event.GetPosition(), SquareLength());
+        symbol[i]->FinishMove(event.GetPosition());
     }
     Refresh(true);
 }
@@ -110,7 +108,7 @@ void GUIBoard::OnMove(wxMouseEvent& event)
     str.Printf(wxT("(x, y) = (%d, %d), length = %d, ClientSize = (%d, %d)"), pt.x, pt.y, SquareLength(), GetClientSize().GetWidth(), GetClientSize().GetHeight());
     statusbar->SetStatusText(str);
     for(int i = 0; i < 32; i++){
-        symbol[i]->Move(pt, SquareLength());
+        symbol[i]->Move(pt);
     }
     Refresh(true);
 }

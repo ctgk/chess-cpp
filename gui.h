@@ -5,16 +5,19 @@ class ChessSymbol
 {
 public:
     ChessSymbol(const wxString path);
-    void PlaceAt(int ii, int jj) { i = ii; j = jj; }
+    void PlaceAt(int x, int y) { boardX = x; boardY = y; }
     void Draw(wxDC& dc, int length);
-    bool BeginMove(wxPoint pt, int length);
-    void FinishMove(wxPoint pt, int length);
-    void Move(wxPoint pt, int length);
+    bool BeginMove(wxPoint pt);
+    void FinishMove(wxPoint pt);
+    void Move(wxPoint pt);
 
 private:
+    int spacingLength;
+    int symbolSize;
+    int spacingOffset;
     bool dragging;
-    int i, j;
-    int x, y;
+    int boardX, boardY;
+    int pixelX, pixelY;
     wxImage img;
 };
 
