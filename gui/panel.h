@@ -1,0 +1,24 @@
+#include <wx/wx.h>
+#include "chess_symbol.h"
+#include "../board.h"
+
+class Panel : public wxPanel
+{
+public:
+    Panel(wxFrame *parent, Board *chessboard);
+
+protected:
+    void OnPaint(wxPaintEvent& event);
+    void OnMouseDown(wxMouseEvent& event);
+    void OnMouseUp(wxMouseEvent& event);
+    void OnMove(wxMouseEvent& event);
+
+private:
+    int SquareLength();
+    void DrawSquare(wxPaintDC &dc, int x, int y);
+    void LoadPiece();
+    wxStatusBar *statusbar;
+    Board *board;
+    int boardLength;
+    ChessSymbol *symbol[32];
+};

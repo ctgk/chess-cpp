@@ -1,12 +1,12 @@
 #include "main.h"
-#include "gui.h"
+#include "gui/frame.h"
 
 IMPLEMENT_APP(ChessApp)
 
 bool ChessApp::OnInit()
 {
     wxInitAllImageHandlers();
-    MyFrame *frame = new MyFrame(wxT("Chess"));
+    Frame *frame = new Frame(wxT("Chess"));
     frame->Show(true);
 
     return true;

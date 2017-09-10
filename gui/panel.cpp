@@ -1,65 +1,6 @@
-#include "gui.h"
+#include "panel.h"
 
-ChessSymbol::ChessSymbol(const wxString path)
-{
-    captured = false;
-    dragging = false;
-    img = wxImage(path, wxBITMAP_TYPE_ANY);
-}
-
-void ChessSymbol::Draw(wxDC& dc, int length)
-{
-    spacingLength = length;
-    symbolSize = length * 0.8;
-    spacingOffset = length * 0.1;
-    if(dragging){
-        dc.DrawBitmap(
-            wxBitmap(img.Scale(symbolSize, symbolSize)),
-            pixelX, pixelY, false
-        );
-    } else if(!captured){
-        dc.DrawBitmap(
-            wxBitmap(img.Scale(symbolSize, symbolSize)),
-            boardX * length + spacingOffset, boardY * length + spacingOffset, false
-        );
-    }
-}
-
-bool ChessSymbol::BeginMove(wxPoint pt)
-{
-    if(captured){
-        return false;
-    }
-    pixelX = boardX * spacingLength + spacingOffset;
-    pixelY = boardY * spacingLength + spacingOffset;
-    if(pixelX <= pt.x && pt.x <= pixelX + symbolSize && pixelY <= pt.y && pt.y <= pixelY + symbolSize){
-        pixelX = pt.x - symbolSize / 2;
-        pixelY = pt.y - symbolSize / 2;
-        dragging = true;
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void ChessSymbol::FinishMove(wxPoint pt)
-{
-    if(dragging){
-        boardX = pt.x / spacingLength;
-        boardY = pt.y / spacingLength;
-        dragging = false;
-    }
-}
-
-void ChessSymbol::Move(wxPoint pt)
-{
-    if(dragging){
-        pixelX = pt.x - symbolSize / 2;
-        pixelY = pt.y - symbolSize / 2;
-    }
-}
-
-GUIBoard::GUIBoard(wxFrame *parent, Board *chessboard)
+Panel::Panel(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
     board = chessboard;
@@ -67,13 +8,13 @@ GUIBoard::GUIBoard(wxFrame *parent, Board *chessboard)
     statusbar = parent->GetStatusBar();
     LoadPiece();
 
-    Connect(wxEVT_PAINT, wxPaintEventHandler(GUIBoard::OnPaint));
-    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(GUIBoard::OnMouseDown));
-    Connect(wxEVT_LEFT_UP, wxMouseEventHandler(GUIBoard::OnMouseUp));
-    Connect(wxEVT_MOTION, wxMouseEventHandler(GUIBoard::OnMove));
+    Connect(wxEVT_PAINT, wxPaintEventHandler(Panel::OnPaint));
+    Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(Panel::OnMouseDown));
+    Connect(wxEVT_LEFT_UP, wxMouseEventHandler(Panel::OnMouseUp));
+    Connect(wxEVT_MOTION, wxMouseEventHandler(Panel::OnMove));
 }
 
-void GUIBoard::OnPaint(wxPaintEvent& event)
+void Panel::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
 
@@ -88,7 +29,7 @@ void GUIBoard::OnPaint(wxPaintEvent& event)
     }
 }
 
-void GUIBoard::OnMouseDown(wxMouseEvent& event)
+void Panel::OnMouseDown(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
         if(symbol[i]->BeginMove(event.GetPosition())){
@@ -97,7 +38,7 @@ void GUIBoard::OnMouseDown(wxMouseEvent& event)
     }
 }
 
-void GUIBoard::OnMouseUp(wxMouseEvent& event)
+void Panel::OnMouseUp(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
         if (symbol[i]->isDragging()){
@@ -117,7 +58,7 @@ void GUIBoard::OnMouseUp(wxMouseEvent& event)
     Refresh(true);
 }
 
-void GUIBoard::OnMove(wxMouseEvent& event)
+void Panel::OnMove(wxMouseEvent& event)
 {
     wxString str;
     wxPoint pt = ScreenToClient(wxGetMousePosition());
@@ -129,7 +70,7 @@ void GUIBoard::OnMove(wxMouseEvent& event)
     Refresh(true);
 }
 
-int GUIBoard::SquareLength()
+int Panel::SquareLength()
 {
     int width = GetClientSize().GetWidth();
     int height = GetClientSize().GetHeight();
@@ -137,7 +78,7 @@ int GUIBoard::SquareLength()
     return length;
 }
 
-void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y)
+void Panel::DrawSquare(wxPaintDC& dc, int x, int y)
 {
     static wxColor light = wxColor(255, 222, 173);
     static wxColor dark = wxColor(205, 133, 63);
@@ -153,7 +94,7 @@ void GUIBoard::DrawSquare(wxPaintDC& dc, int x, int y)
         SquareLength(), SquareLength());
 }
 
-void GUIBoard::LoadPiece()
+void Panel::LoadPiece()
 {
     wxString path[12] = {
         wxT("img/black_pawn.png"),
@@ -180,14 +121,4 @@ void GUIBoard::LoadPiece()
             }
         }
     }
-}
-
-MyFrame::MyFrame(const wxString& title)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(480, 520))
-{
-    wxStatusBar *sb = CreateStatusBar();
-    sb->SetStatusText(wxT("White's Turn"));
-    Board *board = new Board();
-    GUIBoard *guiboard = new GUIBoard(this, board);
-    guiboard->SetFocus();
 }
