@@ -1,5 +1,4 @@
 #include "board.h"
-#include <string>
 
 void Board::LoadStartingPosition()
 {
