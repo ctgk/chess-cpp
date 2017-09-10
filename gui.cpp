@@ -107,7 +107,7 @@ void GUIBoard::OnMove(wxMouseEvent& event)
 {
     wxString str;
     wxPoint pt = ScreenToClient(wxGetMousePosition());
-    str.Printf(wxT("(x, y) = (%d, %d), length = %d"), pt.x, pt.y, SquareLength());
+    str.Printf(wxT("(x, y) = (%d, %d), length = %d, ClientSize = (%d, %d)"), pt.x, pt.y, SquareLength(), GetClientSize().GetWidth(), GetClientSize().GetHeight());
     statusbar->SetStatusText(str);
     for(int i = 0; i < 32; i++){
         symbol[i]->Move(pt, SquareLength());
@@ -169,7 +169,7 @@ void GUIBoard::LoadPiece()
 }
 
 MyFrame::MyFrame(const wxString& title)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500))
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(480, 520))
 {
     wxStatusBar *sb = CreateStatusBar();
     sb->SetStatusText(wxT("White's Turn"));
