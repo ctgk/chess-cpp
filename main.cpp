@@ -1,5 +1,5 @@
 #include "main.h"
-#include "gui/frame.h"
+#include "frame.h"
 
 IMPLEMENT_APP(ChessApp)
 

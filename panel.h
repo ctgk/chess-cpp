@@ -1,6 +1,6 @@
 #include <wx/wx.h>
 #include "chess_symbol.h"
-#include "../board.h"
+#include "board.h"
 
 class Panel : public wxPanel
 {

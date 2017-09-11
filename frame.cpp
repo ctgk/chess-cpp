@@ -1,6 +1,6 @@
 #include "frame.h"
 #include "panel.h"
-#include "../board.h"
+#include "board.h"
 
 Frame::Frame(const wxString& title)
     : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(480, 520))
