@@ -1,13 +1,13 @@
-#include "chess_symbol.h"
+#include "symbol.h"
 
-ChessSymbol::ChessSymbol(const wxString path)
+Symbol::Symbol(const wxString path)
 {
     captured = false;
     dragging = false;
     img = wxImage(path, wxBITMAP_TYPE_ANY);
 }
 
-void ChessSymbol::Draw(wxDC& dc, int length)
+void Symbol::Draw(wxDC& dc, int length)
 {
     spacingLength = length;
     symbolSize = length * 0.8;
@@ -25,7 +25,7 @@ void ChessSymbol::Draw(wxDC& dc, int length)
     }
 }
 
-bool ChessSymbol::BeginMove(wxPoint pt)
+bool Symbol::BeginMove(wxPoint pt)
 {
     if(captured){
         return false;
@@ -42,7 +42,7 @@ bool ChessSymbol::BeginMove(wxPoint pt)
     }
 }
 
-void ChessSymbol::FinishMove(wxPoint pt)
+void Symbol::FinishMove(wxPoint pt)
 {
     if(dragging){
         boardX = pt.x / spacingLength;
@@ -51,7 +51,7 @@ void ChessSymbol::FinishMove(wxPoint pt)
     }
 }
 
-void ChessSymbol::Move(wxPoint pt)
+void Symbol::Move(wxPoint pt)
 {
     if(dragging){
         pixelX = pt.x - symbolSize / 2;

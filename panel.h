@@ -1,5 +1,5 @@
 #include <wx/wx.h>
-#include "chess_symbol.h"
+#include "symbol.h"
 #include "board.h"
 
 class Panel : public wxPanel
@@ -20,5 +20,5 @@ private:
     wxStatusBar *statusbar;
     Board *board;
     int boardLength;
-    ChessSymbol *symbol[32];
+    Symbol *symbol[32];
 };

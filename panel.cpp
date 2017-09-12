@@ -117,7 +117,7 @@ void Panel::LoadPiece()
         for(int j = 0; j < boardLength; j++){
             char piece = board->pieceAt(i, j);
             if(piece != '-'){
-                symbol[count] = new ChessSymbol(mp[piece]);
+                symbol[count] = new Symbol(mp[piece]);
                 symbol[count]->PlaceAt(j, i);
                 count++;
             }

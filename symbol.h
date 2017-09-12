@@ -1,9 +1,9 @@
 #include <wx/wx.h>
 
-class ChessSymbol
+class Symbol
 {
 public:
-    ChessSymbol(const wxString path);
+    Symbol(const wxString path);
     void PlaceAt(int x, int y) { boardX = x; boardY = y; }
     void Draw(wxDC& dc, int length);
     bool BeginMove(wxPoint pt);
