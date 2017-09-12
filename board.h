@@ -1,18 +1,38 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-enum chessPiece { p, n, b, r, q, k, P, N, B, R, Q, K, v };
+#include <string>
 
 class Board
 {
 public:
-    Board() { LoadStartingPosition(); }
-    void LoadStartingPosition();
-    chessPiece& PieceAt(int x, int y) { return board[y][x]; }
+    Board();
+    void FEN2Board();
+    void board2FEN();
+    char& pieceAt(std::string notation);
+    char& pieceAt(int i, int j) { return piecePlacement[i][j]; }
+    std::string getPieceColor(char piece);
+    std::string getPieceColorAt(std::string notation);
+    std::string getPieceColorAt(int i, int j);
+    bool move(std::string origin, std::string destination);
+    void changeActiveColor();
+    std::string getFEN() { return fen; }
+    std::string getActiveColor() { return activeColor; }
+    std::string getCastlability() { return castlability; }
+    std::string getEnPassantTarget() { return enPassantTarget; }
+    int getHalfmoveClock() { return halfmoveClock; }
+    int getFullmoveNumber() { return fullmoveNumber; }
     static const int Length = 8;
 
+
 private:
-    chessPiece board[Length][Length];
+    std::string fen;
+    std::string activeColor;
+    std::string castlability;
+    std::string enPassantTarget;
+    int halfmoveClock;
+    int fullmoveNumber;
+    char piecePlacement[Length][Length];
 };
 
 #endif

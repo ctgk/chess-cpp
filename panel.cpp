@@ -1,4 +1,5 @@
 #include "panel.h"
+#include <map>
 
 Panel::Panel(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
@@ -97,27 +98,27 @@ void Panel::DrawSquare(wxPaintDC& dc, int x, int y)
 
 void Panel::LoadPiece()
 {
-    wxString path[12] = {
-        wxT("img/black_pawn.png"),
-        wxT("img/black_knight.png"),
-        wxT("img/black_bishop.png"),
-        wxT("img/black_rook.png"),
-        wxT("img/black_queen.png"),
-        wxT("img/black_king.png"),
-        wxT("img/white_pawn.png"),
-        wxT("img/white_knight.png"),
-        wxT("img/white_bishop.png"),
-        wxT("img/white_rook.png"),
-        wxT("img/white_queen.png"),
-        wxT("img/white_king.png")
-    };
+    std::map<char, wxString> mp;
+    mp['p'] = wxT("img/black_pawn.png");
+    mp['n'] = wxT("img/black_knight.png");
+    mp['b'] = wxT("img/black_bishop.png");
+    mp['r'] = wxT("img/black_rook.png");
+    mp['q'] = wxT("img/black_queen.png");
+    mp['k'] = wxT("img/black_king.png");
+    mp['P'] = wxT("img/white_pawn.png");
+    mp['N'] = wxT("img/white_knight.png");
+    mp['B'] = wxT("img/white_bishop.png");
+    mp['R'] = wxT("img/white_rook.png");
+    mp['Q'] = wxT("img/white_queen.png");
+    mp['K'] = wxT("img/white_king.png");
+
     int count = 0;
     for(int i = 0; i < boardLength; i++){
         for(int j = 0; j < boardLength; j++){
-            chessPiece piece = board->PieceAt(i, j);
-            if(piece < 12){
-                symbol[count] = new ChessSymbol(path[piece]);
-                symbol[count]->PlaceAt(i, j);
+            char piece = board->pieceAt(i, j);
+            if(piece != '-'){
+                symbol[count] = new ChessSymbol(mp[piece]);
+                symbol[count]->PlaceAt(j, i);
                 count++;
             }
         }
