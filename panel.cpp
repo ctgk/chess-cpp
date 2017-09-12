@@ -43,6 +43,11 @@ void Panel::OnMouseUp(wxMouseEvent& event)
     for(int i = 0; i < 32; i++){
         if (symbol[i]->isDragging()){
             symbol[i]->FinishMove(event.GetPosition());
+            if(statusbar->GetStatusText() == wxT("White's Turn")){
+                statusbar->SetStatusText(wxT("Black's Turn"));
+            } else {
+                statusbar->SetStatusText(wxT("White's Turn"));
+            }
             int targetX = symbol[i]->getBoardX();
             int targetY = symbol[i]->getBoardY();
 
@@ -60,12 +65,8 @@ void Panel::OnMouseUp(wxMouseEvent& event)
 
 void Panel::OnMove(wxMouseEvent& event)
 {
-    wxString str;
-    wxPoint pt = ScreenToClient(wxGetMousePosition());
-    str.Printf(wxT("(x, y) = (%d, %d), length = %d, ClientSize = (%d, %d)"), pt.x, pt.y, SquareLength(), GetClientSize().GetWidth(), GetClientSize().GetHeight());
-    statusbar->SetStatusText(str);
     for(int i = 0; i < 32; i++){
-        symbol[i]->Move(pt);
+        symbol[i]->Move(ScreenToClient(wxGetMousePosition()));
     }
     Refresh(true);
 }
