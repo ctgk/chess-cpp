@@ -5,7 +5,7 @@
 #include <vector>
 #include "board.h"
 
-std::vector<std::string> split(std::string& str, char sep)
+std::vector<std::string> split(std::string str, char sep)
 {
     std::vector<std::string> str_blocks;
     std::stringstream ss(str);
@@ -94,7 +94,7 @@ std::string Board::getPieceColor(char piece)
     } else if('a' < piece && piece < 'z'){
         return "b";
     } else {
-        return "n";
+        return "-";
     }
 }
 
@@ -132,3 +132,11 @@ void Board::changeActiveColor()
         activeColor = "w";
     }
 }
+
+// int main()
+// {
+//     Board board = Board();
+//     std::cout << board.getFEN() << std::endl;
+//     board.move("e2", "e4");
+//     std::cout << board.getFEN() << std::endl;
+// }
