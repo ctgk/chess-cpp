@@ -15,7 +15,7 @@ public:
     std::string getPieceColorAt(std::string notation);
     std::string getPieceColorAt(int i, int j);
     bool move(std::string origin, std::string destination);
-    void changeActiveColor();
+    std::string getDestination(std::string origin, int fileDirection, int rankDirection);
     std::string getFEN() { return fen; }
     std::string getActiveColor() { return activeColor; }
     std::string getCastlability() { return castlability; }
@@ -33,6 +33,7 @@ private:
     int halfmoveClock;
     int fullmoveNumber;
     char piecePlacement[Length][Length];
+    void changeActiveColor();
 };
 
 #endif

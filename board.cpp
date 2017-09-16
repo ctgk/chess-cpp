@@ -124,6 +124,24 @@ bool Board::move(std::string origin, std::string destination)
     return false;
 }
 
+std::string getDestination(std::string origin, int fileDirection, int rankDirection)
+{
+    char originFile = origin[0];
+    char originRank = origin[1];
+    std::string destination;
+    char destinationFile = originFile + fileDirection;
+    char destinationRank = originRank + rankDirection;
+
+    if('a' <= destinationFile && destinationFile <= 'h'
+    && '1' <= destinationRank && destinationRank <= '8'){
+        destination += destinationFile;
+        destination += destinationRank;
+    } else {
+        destination = "-";
+    }
+    return destination;
+}
+
 void Board::changeActiveColor()
 {
     if(activeColor == "w"){
