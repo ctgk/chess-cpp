@@ -7,7 +7,7 @@ public:
     void PlaceAt(int x, int y) { boardX = x; boardY = y; }
     void Draw(wxDC& dc, int length);
     bool BeginMove(wxPoint pt);
-    void FinishMove(wxPoint pt);
+    void FinishMove(wxPoint pt, bool moved);
     void Move(wxPoint pt);
     bool isDragging() { return dragging; }
     int getBoardX() { return boardX; }

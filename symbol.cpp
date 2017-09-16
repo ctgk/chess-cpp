@@ -42,11 +42,13 @@ bool Symbol::BeginMove(wxPoint pt)
     }
 }
 
-void Symbol::FinishMove(wxPoint pt)
+void Symbol::FinishMove(wxPoint pt, bool moved)
 {
     if(dragging){
-        boardX = pt.x / spacingLength;
-        boardY = pt.y / spacingLength;
+        if(moved){
+            boardX = pt.x / spacingLength;
+            boardY = pt.y / spacingLength;
+        }
         dragging = false;
     }
 }

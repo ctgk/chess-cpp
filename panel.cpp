@@ -1,5 +1,6 @@
 #include "panel.h"
 #include <map>
+#include <string>
 
 Panel::Panel(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
@@ -34,6 +35,7 @@ void Panel::OnMouseDown(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
         if(symbol[i]->BeginMove(event.GetPosition())){
+            origin = board->getNotation(symbol[i]->getBoardY(), symbol[i]->getBoardX());
             break;
         }
     }
@@ -43,21 +45,24 @@ void Panel::OnMouseUp(wxMouseEvent& event)
 {
     for(int i = 0; i < 32; i++){
         if (symbol[i]->isDragging()){
-            symbol[i]->FinishMove(event.GetPosition());
-            if(statusbar->GetStatusText() == wxT("White's Turn")){
-                statusbar->SetStatusText(wxT("Black's Turn"));
-            } else {
-                statusbar->SetStatusText(wxT("White's Turn"));
-            }
-            int targetX = symbol[i]->getBoardX();
-            int targetY = symbol[i]->getBoardY();
+            int targetX = event.GetPosition().x / SquareLength();
+            int targetY = event.GetPosition().y / SquareLength();
+            std::string dest = board->getNotation(targetY, targetX);
+            bool moved = board->move(origin, dest);
+            symbol[i]->FinishMove(event.GetPosition(), moved);
+            if(moved){
+                if(statusbar->GetStatusText() == wxT("White's Turn")){
+                    statusbar->SetStatusText(wxT("Black's Turn"));
+                } else {
+                    statusbar->SetStatusText(wxT("White's Turn"));
+                }
 
-            for(int j = 0; j < 32; j++){
-                if(j != i && targetX == symbol[j]->getBoardX() && targetY == symbol[j]->getBoardY()){
-                    symbol[j]->remove();
+                for(int j = 0; j < 32; j++){
+                    if(j != i && targetX == symbol[j]->getBoardX() && targetY == symbol[j]->getBoardY()){
+                        symbol[j]->remove();
+                    }
                 }
             }
-
             break;
         }
     }

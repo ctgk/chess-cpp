@@ -1,3 +1,4 @@
+#include <string>
 #include <wx/wx.h>
 #include "symbol.h"
 #include "board.h"
@@ -21,4 +22,5 @@ private:
     Board *board;
     int boardLength;
     Symbol *symbol[32];
+    std::string origin;
 };
