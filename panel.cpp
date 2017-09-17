@@ -8,6 +8,7 @@ Panel::Panel(wxFrame *parent, Board *chessboard)
     board = chessboard;
     boardLength = chessboard->Length;
     statusbar = parent->GetStatusBar();
+    statusbar->SetStatusText(chessboard->getFEN());
     LoadPiece();
 
     Connect(wxEVT_PAINT, wxPaintEventHandler(Panel::OnPaint));
@@ -18,6 +19,7 @@ Panel::Panel(wxFrame *parent, Board *chessboard)
 
 void Panel::OnPaint(wxPaintEvent& event)
 {
+    statusbar->SetStatusText(board->getFEN());
     wxPaintDC dc(this);
 
     for (int i = 0; i < boardLength; i++){
@@ -51,12 +53,6 @@ void Panel::OnMouseUp(wxMouseEvent& event)
             bool moved = board->move(origin, dest);
             symbol[i]->FinishMove(event.GetPosition(), moved);
             if(moved){
-                if(statusbar->GetStatusText() == wxT("White's Turn")){
-                    statusbar->SetStatusText(wxT("Black's Turn"));
-                } else {
-                    statusbar->SetStatusText(wxT("White's Turn"));
-                }
-
                 for(int j = 0; j < 32; j++){
                     if(j != i && targetX == symbol[j]->getBoardX() && targetY == symbol[j]->getBoardY()){
                         symbol[j]->remove();
