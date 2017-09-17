@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <complex>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -136,19 +137,31 @@ char Board::getPieceColorAt(int i, int j)
 bool Board::move(std::string origin, std::string destination)
 {
     char movingColor = getPieceColorAt(origin);
-    if(movingColor == activeColor){
-        std::vector<std::string> possibleMoves = getPossibleMovesAt(origin);
-        if(std::find(possibleMoves.begin(), possibleMoves.end(), destination) == possibleMoves.end()) return false;
-        pieceAt(destination) = pieceAt(origin);
-        pieceAt(origin) = '-';
-        changeActiveColor();
-        if(movingColor == 'b'){
-            fullmoveNumber += 1;
-        }
-        board2FEN();
-        return true;
+    if(movingColor != activeColor) return false;
+    std::vector<std::string> moves = getPossibleMovesAt(origin);
+    if(std::find(moves.begin(), moves.end(), destination) == moves.end())
+        return false;
+    bool captured = (pieceAt(destination) != '-');
+    pieceAt(destination) = pieceAt(origin);
+    pieceAt(origin) = '-';
+
+    changeActiveColor();
+    updateCastlability(origin, destination);
+    updateEnPassantTarget(origin, destination);
+
+    // update halfmove clock
+    if(captured || pieceAt(destination) == 'p' || pieceAt(destination) == 'P'){
+        halfmoveClock = 0;
+    } else {
+        halfmoveClock += 1;
     }
-    return false;
+
+    // increase fullmove number
+    if(movingColor == 'b'){
+        fullmoveNumber += 1;
+    }
+    board2FEN();
+    return true;
 }
 
 std::string Board::getDestination(std::string origin, int fileDirection, int rankDirection)
@@ -415,7 +428,7 @@ std::vector<std::string> Board::getKingAttackingSquares(std::string notation)
 
     for(int i = 0; i < 8; i++){
         candidate = getDestination(notation, direction[i][0], direction[i][1]);
-        if(candidate == "-") break;
+        if(candidate == "-") continue;
         targetColor = getPieceColorAt(candidate);
         if(targetColor == pieceColor){
             continue;
@@ -456,6 +469,49 @@ void Board::changeActiveColor()
         activeColor = 'b';
     } else {
         activeColor = 'w';
+    }
+}
+
+void Board::updateCastlability(std::string origin, std::string destination)
+{
+    int pos;
+    if(pieceAt(destination) == 'K'){
+        pos = castlability.find('K');
+        if(pos != -1) castlability.erase(pos, 1);
+        pos = castlability.find('Q');
+        if(pos != -1) castlability.erase(pos, 1);
+    } else if(pieceAt(destination) == 'k'){
+        pos = castlability.find('k');
+        if(pos != -1) castlability.erase(pos, 1);
+        pos = castlability.find('q');
+        if(pos != -1) castlability.erase(pos, 1);
+    } else if(origin == "a1"){
+        pos = castlability.find('Q');
+        if(pos != -1) castlability.erase(pos, 1);
+    } else if(origin == "h1"){
+        pos = castlability.find('K');
+        if(pos != -1) castlability.erase(pos, 1);
+    } else if(origin == "a8"){
+        pos = castlability.find('q');
+        if(pos != -1) castlability.erase(pos, 1);
+    } else if(origin == "h8"){
+        pos = castlability.find('k');
+        if(pos != -1) castlability.erase(pos, 1);
+    }
+    if(castlability.empty()) castlability = "-";
+}
+
+void Board::updateEnPassantTarget(std::string origin, std::string destination)
+{
+    if(pieceAt(destination) == 'p' || pieceAt(destination) == 'P'){
+        if(std::abs(origin[1] - destination[1]) > 1){
+            enPassantTarget = origin[0];
+            enPassantTarget += (origin[1] + destination[1]) / 2;
+        } else {
+            enPassantTarget = "-";
+        }
+    } else {
+        enPassantTarget = "-";
     }
 }
 

@@ -21,18 +21,6 @@ public:
     std::string getDestination(std::string origin, int fileDirection, int rankDirection);
     std::vector<std::string> getAttackingSquaresAt(std::string notation);
     std::vector<std::string> getPossibleMovesAt(std::string notation);
-    std::vector<std::string> getPawnAttackingSquares(std::string notation);
-    std::vector<std::string> getPawnPossibleMoves(std::string notation);
-    std::vector<std::string> getKnightAttackingSquares(std::string notation);
-    std::vector<std::string> getKnightPossibleMoves(std::string notation);
-    std::vector<std::string> getBishopAttackingSquares(std::string notation);
-    std::vector<std::string> getBishopPossibleMoves(std::string notation);
-    std::vector<std::string> getRookAttackingSquares(std::string notation);
-    std::vector<std::string> getRookPossibleMoves(std::string notation);
-    std::vector<std::string> getQueenAttackingSquares(std::string notation);
-    std::vector<std::string> getQueenPossibleMoves(std::string notation);
-    std::vector<std::string> getKingAttackingSquares(std::string notation);
-    std::vector<std::string> getKingPossibleMoves(std::string notation);
     std::string getFEN() { return fen; }
     char getActiveColor() { return activeColor; }
     std::string getCastlability() { return castlability; }
@@ -51,6 +39,20 @@ private:
     int fullmoveNumber;
     char piecePlacement[Length][Length];
     void changeActiveColor();
+    void updateCastlability(std::string origin, std::string destination);
+    void updateEnPassantTarget(std::string origin, std::string destination);
+    std::vector<std::string> getPawnAttackingSquares(std::string notation);
+    std::vector<std::string> getPawnPossibleMoves(std::string notation);
+    std::vector<std::string> getKnightAttackingSquares(std::string notation);
+    std::vector<std::string> getKnightPossibleMoves(std::string notation);
+    std::vector<std::string> getBishopAttackingSquares(std::string notation);
+    std::vector<std::string> getBishopPossibleMoves(std::string notation);
+    std::vector<std::string> getRookAttackingSquares(std::string notation);
+    std::vector<std::string> getRookPossibleMoves(std::string notation);
+    std::vector<std::string> getQueenAttackingSquares(std::string notation);
+    std::vector<std::string> getQueenPossibleMoves(std::string notation);
+    std::vector<std::string> getKingAttackingSquares(std::string notation);
+    std::vector<std::string> getKingPossibleMoves(std::string notation);
 };
 
 #endif
