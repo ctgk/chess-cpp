@@ -1,2 +1,2 @@
-# chess-c-
+# chess-cpp
 GUI chess program in C++
