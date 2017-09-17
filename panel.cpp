@@ -5,6 +5,18 @@
 Panel::Panel(wxFrame *parent, Board *chessboard)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
+    symbolPath['p'] = wxT("img/black_pawn.png");
+    symbolPath['n'] = wxT("img/black_knight.png");
+    symbolPath['b'] = wxT("img/black_bishop.png");
+    symbolPath['r'] = wxT("img/black_rook.png");
+    symbolPath['q'] = wxT("img/black_queen.png");
+    symbolPath['k'] = wxT("img/black_king.png");
+    symbolPath['P'] = wxT("img/white_pawn.png");
+    symbolPath['N'] = wxT("img/white_knight.png");
+    symbolPath['B'] = wxT("img/white_bishop.png");
+    symbolPath['R'] = wxT("img/white_rook.png");
+    symbolPath['Q'] = wxT("img/white_queen.png");
+    symbolPath['K'] = wxT("img/white_king.png");
     board = chessboard;
     boardLength = chessboard->Length;
     statusbar = parent->GetStatusBar();
@@ -28,14 +40,14 @@ void Panel::OnPaint(wxPaintEvent& event)
         }
     }
 
-    for (int i = 0; i < 32; i++){
+    for(int i = 0; i < symbol.size(); i++){
         symbol[i]->Draw(dc, SquareLength());
     }
 }
 
 void Panel::OnMouseDown(wxMouseEvent& event)
 {
-    for(int i = 0; i < 32; i++){
+    for(int i = 0; i < symbol.size(); i++){
         if(symbol[i]->BeginMove(event.GetPosition())){
             origin = board->getNotation(symbol[i]->getBoardY(), symbol[i]->getBoardX());
             break;
@@ -45,29 +57,24 @@ void Panel::OnMouseDown(wxMouseEvent& event)
 
 void Panel::OnMouseUp(wxMouseEvent& event)
 {
-    for(int i = 0; i < 32; i++){
+    for(int i = 0; i < symbol.size(); i++){
         if (symbol[i]->isDragging()){
             int targetX = event.GetPosition().x / SquareLength();
             int targetY = event.GetPosition().y / SquareLength();
             std::string dest = board->getNotation(targetY, targetX);
             bool moved = board->move(origin, dest);
             symbol[i]->FinishMove(event.GetPosition(), moved);
-            if(moved){
-                for(int j = 0; j < 32; j++){
-                    if(j != i && targetX == symbol[j]->getBoardX() && targetY == symbol[j]->getBoardY()){
-                        symbol[j]->remove();
-                    }
-                }
-            }
+            if(moved) LoadPiece();
             break;
         }
     }
+    statusbar->SetStatusText(board->getFEN());
     Refresh(true);
 }
 
 void Panel::OnMove(wxMouseEvent& event)
 {
-    for(int i = 0; i < 32; i++){
+    for(int i = 0; i < symbol.size(); i++){
         symbol[i]->Move(ScreenToClient(wxGetMousePosition()));
     }
     Refresh(true);
@@ -99,28 +106,15 @@ void Panel::DrawSquare(wxPaintDC& dc, int x, int y)
 
 void Panel::LoadPiece()
 {
-    std::map<char, wxString> mp;
-    mp['p'] = wxT("img/black_pawn.png");
-    mp['n'] = wxT("img/black_knight.png");
-    mp['b'] = wxT("img/black_bishop.png");
-    mp['r'] = wxT("img/black_rook.png");
-    mp['q'] = wxT("img/black_queen.png");
-    mp['k'] = wxT("img/black_king.png");
-    mp['P'] = wxT("img/white_pawn.png");
-    mp['N'] = wxT("img/white_knight.png");
-    mp['B'] = wxT("img/white_bishop.png");
-    mp['R'] = wxT("img/white_rook.png");
-    mp['Q'] = wxT("img/white_queen.png");
-    mp['K'] = wxT("img/white_king.png");
-
-    int count = 0;
+    symbol.resize(0);
+    char piece;
     for(int i = 0; i < boardLength; i++){
         for(int j = 0; j < boardLength; j++){
-            char piece = board->pieceAt(i, j);
+            piece = board->pieceAt(i, j);
             if(piece != '-'){
-                symbol[count] = new Symbol(mp[piece]);
-                symbol[count]->PlaceAt(j, i);
-                count++;
+                Symbol* sym = new Symbol(symbolPath[piece]);
+                sym->PlaceAt(j, i);
+                symbol.push_back(sym);
             }
         }
     }

@@ -1,4 +1,6 @@
+#include <map>
 #include <string>
+#include <vector>
 #include <wx/wx.h>
 #include "symbol.h"
 #include "board.h"
@@ -21,6 +23,7 @@ private:
     wxStatusBar *statusbar;
     Board *board;
     int boardLength;
-    Symbol *symbol[32];
+    std::vector<Symbol*> symbol;
     std::string origin;
+    std::map<char, wxString> symbolPath;
 };
