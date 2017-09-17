@@ -182,6 +182,21 @@ std::string Board::getDestination(std::string origin, int fileDirection, int ran
     return destination;
 }
 
+std::vector<std::string> Board::getAttackingSquares(char color)
+{
+    std::vector<std::string> squares;
+    std::vector<std::string> tmp;
+    for(int i = 0; i < Length; i++){
+        for(int j = 0; j < Length; j++){
+            if(getPieceColorAt(i, j) == color){
+                tmp = getAttackingSquaresAt(getNotation(i, j));
+                squares.insert(squares.end(), tmp.begin(), tmp.end());
+            }
+        }
+    }
+    return squares;
+}
+
 std::vector<std::string> Board::getAttackingSquaresAt(std::string notation)
 {
     char piece = pieceAt(notation);
@@ -442,7 +457,29 @@ std::vector<std::string> Board::getKingAttackingSquares(std::string notation)
 
 std::vector<std::string> Board::getKingPossibleMoves(std::string notation)
 {
-    return getKingAttackingSquares(notation);
+    std::vector<std::string> moves = getKingAttackingSquares(notation);
+    char pieceColor = getPieceColorAt(notation);
+    char opponentColor = (pieceColor == 'w' ? 'b' : 'w');
+    std::vector<std::string> attacked = getAttackingSquares(opponentColor);
+
+    if(castlability != "-"){
+        if(pieceColor == 'w'){
+            if(castlability.find('K') != -1 && pieceAt("f1") == '-' && pieceAt("g1") == '-' && std::find(attacked.begin(), attacked.end(), "f1") == attacked.end() && std::find(attacked.begin(), attacked.end(), "g1") == attacked.end()){
+                moves.push_back("g1");
+            }
+            if(castlability.find('Q') != -1 && pieceAt("b1") == '-' && pieceAt("c1") == '-' && pieceAt("d1") == '-' && std::find(attacked.begin(), attacked.end(), "c1") == attacked.end() && std::find(attacked.begin(), attacked.end(), "d1") == attacked.end()){
+                moves.push_back("c1");
+            }
+        } else {
+            if(castlability.find('k') != -1 && pieceAt("f8") == '-' && pieceAt("g8") == '-' && std::find(attacked.begin(), attacked.end(), "f8") == attacked.end() && std::find(attacked.begin(), attacked.end(), "g8") == attacked.end()){
+                moves.push_back("g8");
+            }
+            if(castlability.find('q') != -1 && pieceAt("b8") == '-' && pieceAt("c8") == '-' && pieceAt("d8") == '-'){
+                moves.push_back("c8");
+            }
+        }
+    }
+    return moves;
 }
 
 void Board::print()
@@ -477,14 +514,38 @@ void Board::updateCastlability(std::string origin, std::string destination)
     int pos;
     if(pieceAt(destination) == 'K'){
         pos = castlability.find('K');
-        if(pos != -1) castlability.erase(pos, 1);
+        if(pos != -1){
+            if(destination == "g1"){
+                pieceAt("f1") = pieceAt("h1");
+                pieceAt("h1") = '-';
+            }
+            castlability.erase(pos, 1);
+        }
         pos = castlability.find('Q');
-        if(pos != -1) castlability.erase(pos, 1);
+        if(pos != -1){
+            if(destination == "c1"){
+                pieceAt("d1") = pieceAt("a1");
+                pieceAt("a1") = '-';
+            }
+            castlability.erase(pos, 1);
+        }
     } else if(pieceAt(destination) == 'k'){
         pos = castlability.find('k');
-        if(pos != -1) castlability.erase(pos, 1);
+        if(pos != -1){
+            if(destination == "g8"){
+                pieceAt("f8") = pieceAt("h8");
+                pieceAt("h8") = '-';
+            }
+            castlability.erase(pos, 1);
+        }
         pos = castlability.find('q');
-        if(pos != -1) castlability.erase(pos, 1);
+        if(pos != -1){
+            if(destination == "c8"){
+                pieceAt("d8") = pieceAt("a8");
+                pieceAt("a8") = '-';
+            }
+            castlability.erase(pos, 1);
+        }
     } else if(origin == "a1"){
         pos = castlability.find('Q');
         if(pos != -1) castlability.erase(pos, 1);
@@ -521,6 +582,16 @@ void Board::updateEnPassantTarget(std::string origin, std::string destination)
 //     board.print();
 //     board.move("e2", "e4");
 //     board.print();
-//     board.move("e7", "e6");
+//     board.move("e7", "e5");
+//     board.print();
+//     board.move("g1", "f3");
+//     board.print();
+//     board.move("g8", "f6");
+//     board.print();
+//     board.move("f1", "e2");
+//     board.print();
+//     board.move("f8", "e7");
+//     board.print();
+//     board.move("e1", "g1");
 //     board.print();
 // }

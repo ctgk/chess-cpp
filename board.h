@@ -19,6 +19,7 @@ public:
     char getPieceColorAt(int i, int j);
     bool move(std::string origin, std::string destination);
     std::string getDestination(std::string origin, int fileDirection, int rankDirection);
+    std::vector<std::string> getAttackingSquares(char color);
     std::vector<std::string> getAttackingSquaresAt(std::string notation);
     std::vector<std::string> getPossibleMovesAt(std::string notation);
     std::string getFEN() { return fen; }
