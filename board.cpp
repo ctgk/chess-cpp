@@ -40,7 +40,6 @@ void Board::FEN2Board()
     for(int i = 0; i < Length; i++){
         for(int j = 0; j < Length; j++){
             setPieceAt(abbr2piece(placements[i][j]), i, j);
-            getPieceAt(i, j)->placeAt(this, getNotation(i, j));
         }
     }
 
@@ -240,10 +239,9 @@ bool Board::inCheck(char color)
 std::vector<std::string> Piece::removeUnableMoves(std::vector<std::string> moves)
 {
     std::vector<std::string> possibleMoves;
-    std::string origin;
+    std::string origin = position;
     Piece* target;
     for(int i = 0; i < moves.size(); i++){
-        origin = position;
         target = board->getPieceAt(moves[i]);
         board->setPieceAt(this, moves[i]);
         board->setPieceAt(new Vacant(), origin);
