@@ -11,6 +11,7 @@ class Board
 public:
     Board();
     void FEN2Board();
+    void FEN2Board(std::string fen);
     void board2FEN();
     void setPieceAt(Piece* piece, std::string notation);
     void setPieceAt(Piece* piece, int i, int j) { setPieceAt(piece, getNotation(i, j)); }
@@ -38,6 +39,7 @@ public:
     std::string getResult() { return result; }
     void changeActiveColor();
     std::string getKingPosition(char color);
+    bool inCheck(char color);
     void print();
     static const int Length = 8;
 

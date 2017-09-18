@@ -51,6 +51,12 @@ void Board::FEN2Board()
     fullmoveNumber = std::stoi(fenBlocks[5]);
 }
 
+void Board::FEN2Board(std::string fen)
+{
+    this->fen = fen;
+    FEN2Board();
+}
+
 void Board::board2FEN()
 {
     fen = "";
@@ -131,7 +137,6 @@ bool Board::move(std::string origin, std::string destination)
     bool moved = getPieceAt(origin)->moveTo(destination);
     int n_moves = 0;
     if(moved){
-        std::cout << activeColor << ' ';
         for(int i = 0; i < Length; i++){
             for(int j = 0; j < Length; j++){
                 if(getPieceColorAt(i, j) == activeColor){
@@ -141,9 +146,7 @@ bool Board::move(std::string origin, std::string destination)
         }
         if(n_moves == 0){
             finished = true;
-            std::string kingPosition = getKingPosition(activeColor);
-            std::vector<std::string> attacked = getAttackingSquares(activeColor == 'w' ? 'b' : 'w');
-            if(std::find(attacked.begin(), attacked.end(), kingPosition) == attacked.end()){
+            if(!inCheck(activeColor)){
                 result = "0.5-0.5";
             } else {
                 result = activeColor == 'w' ? "0-1" : "1-0";
@@ -227,6 +230,13 @@ std::string Board::getKingPosition(char color)
     return "-";
 }
 
+bool Board::inCheck(char color)
+{
+    std::string kingPosition = getKingPosition(color);
+    std::vector<std::string> attacked = getAttackingSquares(color == 'w' ? 'b' : 'w');
+    return std::find(attacked.begin(), attacked.end(), kingPosition) != attacked.end();
+}
+
 std::vector<std::string> Piece::removeUnableMoves(std::vector<std::string> moves)
 {
     std::vector<std::string> possibleMoves;
@@ -237,9 +247,7 @@ std::vector<std::string> Piece::removeUnableMoves(std::vector<std::string> moves
         target = board->getPieceAt(moves[i]);
         board->setPieceAt(this, moves[i]);
         board->setPieceAt(new Vacant(), origin);
-        std::string kingPosition = board->getKingPosition(color);
-        std::vector<std::string> attacked = board->getAttackingSquares(opponentColor);
-        if(std::find(attacked.begin(), attacked.end(), kingPosition) == attacked.end()){
+        if(!board->inCheck(this->color)){
             possibleMoves.push_back(moves[i]);
         }
         board->setPieceAt(this, origin);
