@@ -314,6 +314,8 @@ std::vector<std::string> Pawn::getPossibleMoves()
         if(candidate != "-"){
             if(board->getPieceColorAt(candidate) == opponentColor){
                 moves.push_back(candidate);
+            } else if(candidate == board->enPassantTarget){
+                moves.push_back(candidate);
             }
         }
     }
@@ -344,6 +346,9 @@ bool Pawn::moveTo(std::string destination)
     if(std::abs(origin[1] - destination[1]) > 1){
         board->enPassantTarget = origin[0];
         board->enPassantTarget += (origin[1] + destination[1]) / 2;
+    } else if(destination == board->enPassantTarget){
+        board->setPieceAt(new Vacant(), board->getDestination(board->enPassantTarget, 0, -movingDirection));
+        board->enPassantTarget = "-";
     } else {
         board->enPassantTarget = "-";
     }
