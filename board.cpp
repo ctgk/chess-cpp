@@ -22,6 +22,7 @@ Board::Board()
 {
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     FEN2Board();
+    finished = false;
 }
 
 void Board::FEN2Board()
@@ -126,7 +127,31 @@ char Board::getPieceColorAt(int i, int j)
 
 bool Board::move(std::string origin, std::string destination)
 {
-    return getPieceAt(origin)->moveTo(destination);
+    if(finished) return false;
+    bool moved = getPieceAt(origin)->moveTo(destination);
+    int n_moves = 0;
+    if(moved){
+        std::cout << activeColor << ' ';
+        for(int i = 0; i < Length; i++){
+            for(int j = 0; j < Length; j++){
+                if(getPieceColorAt(i, j) == activeColor){
+                    n_moves += getPieceAt(i, j)->getPossibleMoves().size();
+                }
+            }
+        }
+        if(n_moves == 0){
+            finished = true;
+            std::string kingPosition = getKingPosition(activeColor);
+            std::vector<std::string> attacked = getAttackingSquares(activeColor == 'w' ? 'b' : 'w');
+            if(std::find(attacked.begin(), attacked.end(), kingPosition) == attacked.end()){
+                result = "0.5-0.5";
+            } else {
+                result = activeColor == 'w' ? "0-1" : "1-0";
+            }
+            std::cout << result << std::endl;
+        }
+    }
+    return moved;
 }
 
 std::string Board::getDestination(std::string origin, int fileDirection, int rankDirection)
@@ -194,7 +219,7 @@ std::string Board::getKingPosition(char color)
     for(int i = 0; i < Length; i++){
         for(int j = 0; j < Length; j++){
             if(getPieceAt(i, j)->name == "King"){
-                if(getPieceColorAt(i, j))
+                if(getPieceColorAt(i, j) == color)
                     return getNotation(i, j);
             }
         }

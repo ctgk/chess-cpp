@@ -34,12 +34,16 @@ public:
     std::string castlability;
     int halfmoveClock;
     int fullmoveNumber;
+    bool isFinished() { return finished; }
+    std::string getResult() { return result; }
     void changeActiveColor();
     std::string getKingPosition(char color);
     void print();
     static const int Length = 8;
 
 private:
+    bool finished;
+    std::string result;
     std::string fen;
     char activeColor;
     std::map<std::string, Piece*> piecePlacement;
