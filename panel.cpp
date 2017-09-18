@@ -110,7 +110,7 @@ void Panel::LoadPiece()
     char piece;
     for(int i = 0; i < boardLength; i++){
         for(int j = 0; j < boardLength; j++){
-            piece = board->pieceAt(i, j);
+            piece = board->getPieceCharAt(i, j);
             if(piece != '-'){
                 Symbol* sym = new Symbol(symbolPath[piece]);
                 sym->PlaceAt(j, i);
