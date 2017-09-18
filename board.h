@@ -35,6 +35,7 @@ public:
     int halfmoveClock;
     int fullmoveNumber;
     void changeActiveColor();
+    std::string getKingPosition(char color);
     void print();
     static const int Length = 8;
 

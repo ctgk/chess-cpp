@@ -189,78 +189,44 @@ void Board::changeActiveColor()
     }
 }
 
-// void Board::updateCastlability(std::string origin, std::string destination)
-// {
-//     int pos;
-//     if(pieceAt(destination) == 'K'){
-//         pos = castlability.find('K');
-//         if(pos != -1){
-//             if(destination == "g1"){
-//                 pieceAt("f1") = pieceAt("h1");
-//                 pieceAt("h1") = '-';
-//             }
-//             castlability.erase(pos, 1);
-//         }
-//         pos = castlability.find('Q');
-//         if(pos != -1){
-//             if(destination == "c1"){
-//                 pieceAt("d1") = pieceAt("a1");
-//                 pieceAt("a1") = '-';
-//             }
-//             castlability.erase(pos, 1);
-//         }
-//     } else if(pieceAt(destination) == 'k'){
-//         pos = castlability.find('k');
-//         if(pos != -1){
-//             if(destination == "g8"){
-//                 pieceAt("f8") = pieceAt("h8");
-//                 pieceAt("h8") = '-';
-//             }
-//             castlability.erase(pos, 1);
-//         }
-//         pos = castlability.find('q');
-//         if(pos != -1){
-//             if(destination == "c8"){
-//                 pieceAt("d8") = pieceAt("a8");
-//                 pieceAt("a8") = '-';
-//             }
-//             castlability.erase(pos, 1);
-//         }
-//     } else if(origin == "a1"){
-//         pos = castlability.find('Q');
-//         if(pos != -1) castlability.erase(pos, 1);
-//     } else if(origin == "h1"){
-//         pos = castlability.find('K');
-//         if(pos != -1) castlability.erase(pos, 1);
-//     } else if(origin == "a8"){
-//         pos = castlability.find('q');
-//         if(pos != -1) castlability.erase(pos, 1);
-//     } else if(origin == "h8"){
-//         pos = castlability.find('k');
-//         if(pos != -1) castlability.erase(pos, 1);
-//     }
-//     if(castlability.empty()) castlability = "-";
-// }
+std::string Board::getKingPosition(char color)
+{
+    for(int i = 0; i < Length; i++){
+        for(int j = 0; j < Length; j++){
+            if(getPieceAt(i, j)->name == "King"){
+                if(getPieceColorAt(i, j))
+                    return getNotation(i, j);
+            }
+        }
+    }
+    return "-";
+}
 
-// void Board::updateEnPassantTarget(std::string origin, std::string destination)
-// {
-//     if(pieceAt(destination) == 'p' || pieceAt(destination) == 'P'){
-//         if(std::abs(origin[1] - destination[1]) > 1){
-//             enPassantTarget = origin[0];
-//             enPassantTarget += (origin[1] + destination[1]) / 2;
-//         } else {
-//             enPassantTarget = "-";
-//         }
-//     } else {
-//         enPassantTarget = "-";
-//     }
-// }
+std::vector<std::string> Piece::removeUnableMoves(std::vector<std::string> moves)
+{
+    std::vector<std::string> possibleMoves;
+    std::string origin;
+    Piece* target;
+    for(int i = 0; i < moves.size(); i++){
+        origin = position;
+        target = board->getPieceAt(moves[i]);
+        board->setPieceAt(this, moves[i]);
+        board->setPieceAt(new Vacant(), origin);
+        std::string kingPosition = board->getKingPosition(color);
+        std::vector<std::string> attacked = board->getAttackingSquares(opponentColor);
+        if(std::find(attacked.begin(), attacked.end(), kingPosition) == attacked.end()){
+            possibleMoves.push_back(moves[i]);
+        }
+        board->setPieceAt(this, origin);
+        board->setPieceAt(target, moves[i]);
+    }
+    return possibleMoves;
+}
 
 void Piece::placeAt(Board* board, std::string placement)
 {
     this->board = board;
     position = placement;
-    homePosition = placement;
 }
 
 std::string Piece::getDestination(int fileMove, int rankMove)
@@ -295,12 +261,13 @@ std::vector<std::string> Pawn::getPossibleMoves()
 {
     std::vector<std::string> moves;
     std::string candidate;
+    char homeRank = color == 'w' ? '2' : '7';
 
     candidate = getDestination(0, movingDirection);
     if(candidate != "-"){
         if(board->getPieceCharAt(candidate) == '-'){
             moves.push_back(candidate);
-            if(position == homePosition){
+            if(position[1] == homeRank){
                 candidate = getDestination(0, 2 * movingDirection);
                 if(board->getPieceCharAt(candidate) == '-'){
                     moves.push_back(candidate);
@@ -320,7 +287,7 @@ std::vector<std::string> Pawn::getPossibleMoves()
         }
     }
 
-    return moves;
+    return removeUnableMoves(moves);
 }
 
 std::vector<std::string> Pawn::getAttackingSquares()
@@ -347,7 +314,10 @@ bool Pawn::moveTo(std::string destination)
         board->enPassantTarget = origin[0];
         board->enPassantTarget += (origin[1] + destination[1]) / 2;
     } else if(destination == board->enPassantTarget){
-        board->setPieceAt(new Vacant(), board->getDestination(board->enPassantTarget, 0, -movingDirection));
+        board->setPieceAt(
+            new Vacant(),
+            board->getDestination(board->enPassantTarget, 0, -movingDirection)
+        );
         board->enPassantTarget = "-";
     } else {
         board->enPassantTarget = "-";
@@ -364,7 +334,12 @@ bool Pawn::moveTo(std::string destination)
 
 std::vector<std::string> Knight::getPossibleMoves()
 {
-    std::vector<std::string> moves;
+    return removeUnableMoves(getAttackingSquares());
+}
+
+std::vector<std::string> Knight::getAttackingSquares()
+{
+    std::vector<std::string> squares;
     std::string candidate;
     static const int direction[8][2] = {
         {-1, 2}, {1, 2},  // front (from white's perspective)
@@ -377,15 +352,20 @@ std::vector<std::string> Knight::getPossibleMoves()
         candidate = getDestination(direction[i][0], direction[i][1]);
         if(candidate == "-") continue;
         if(board->getPieceColorAt(candidate) != this->color)
-            moves.push_back(candidate);
+            squares.push_back(candidate);
     }
 
-    return moves;
+    return squares;
 }
 
 std::vector<std::string> Bishop::getPossibleMoves()
 {
-    std::vector<std::string> moves;
+    return removeUnableMoves(getAttackingSquares());
+}
+
+std::vector<std::string> Bishop::getAttackingSquares()
+{
+    std::vector<std::string> squares;
     std::string candidate;
     static const int direction[4][2] = {
         {-1, 1}, {1, 1},
@@ -402,20 +382,25 @@ std::vector<std::string> Bishop::getPossibleMoves()
             if(targetColor == this->color){
                 break;
             } else if(targetColor == opponentColor){
-                moves.push_back(candidate);
+                squares.push_back(candidate);
                 break;
             } else {
-                moves.push_back(candidate);
+                squares.push_back(candidate);
             }
         }
     }
 
-    return moves;
+    return squares;
 }
 
 std::vector<std::string> Rook::getPossibleMoves()
 {
-    std::vector<std::string> moves;
+    return removeUnableMoves(getAttackingSquares());
+}
+
+std::vector<std::string> Rook::getAttackingSquares()
+{
+    std::vector<std::string> squares;
     std::string candidate;
     static const int direction[4][2] = {
             {0, 1},
@@ -433,15 +418,15 @@ std::vector<std::string> Rook::getPossibleMoves()
             if(targetColor == this->color){
                 break;
             } else if(targetColor == opponentColor){
-                moves.push_back(candidate);
+                squares.push_back(candidate);
                 break;
             } else {
-                moves.push_back(candidate);
+                squares.push_back(candidate);
             }
         }
     }
 
-    return moves;
+    return squares;
 }
 
 bool Rook::moveTo(std::string destination)
@@ -485,7 +470,12 @@ bool Rook::moveTo(std::string destination)
 
 std::vector<std::string> Queen::getPossibleMoves()
 {
-    std::vector<std::string> moves;
+    return removeUnableMoves(getAttackingSquares());
+}
+
+std::vector<std::string> Queen::getAttackingSquares()
+{
+    std::vector<std::string> squares;
     std::string candidate;
     static const int direction[8][2] = {
         {-1, 1}, {0, 1}, {1, 1},
@@ -503,15 +493,15 @@ std::vector<std::string> Queen::getPossibleMoves()
             if(targetColor == this->color){
                 break;
             } else if(targetColor == opponentColor){
-                moves.push_back(candidate);
+                squares.push_back(candidate);
                 break;
             } else {
-                moves.push_back(candidate);
+                squares.push_back(candidate);
             }
         }
     }
 
-    return moves;
+    return squares;
 }
 
 std::vector<std::string> King::getPossibleMoves()
@@ -520,14 +510,14 @@ std::vector<std::string> King::getPossibleMoves()
     std::vector<std::string> attacked = board->getAttackingSquares(opponentColor);
 
     if(board->castlability != "-"){
-        if(color == 'w'){
+        if(color == 'w' && std::find(attacked.begin(), attacked.end(), "e1") == attacked.end()){
             if(board->castlability.find('K') != -1 && board->getPieceCharAt("f1") == '-' && board->getPieceCharAt("g1") == '-' && std::find(attacked.begin(), attacked.end(), "f1") == attacked.end() && std::find(attacked.begin(), attacked.end(), "g1") == attacked.end()){
                 moves.push_back("g1");
             }
             if(board->castlability.find('Q') != -1 && board->getPieceCharAt("b1") == '-' && board->getPieceCharAt("c1") == '-' && board->getPieceCharAt("d1") == '-' && std::find(attacked.begin(), attacked.end(), "c1") == attacked.end() && std::find(attacked.begin(), attacked.end(), "d1") == attacked.end()){
                 moves.push_back("c1");
             }
-        } else {
+        } else if(color == 'b' && std::find(attacked.begin(), attacked.end(), "e8") == attacked.end()){
             if(board->castlability.find('k') != -1 && board->getPieceCharAt("f8") == '-' && board->getPieceCharAt("g8") == '-' && std::find(attacked.begin(), attacked.end(), "f8") == attacked.end() && std::find(attacked.begin(), attacked.end(), "g8") == attacked.end()){
                 moves.push_back("g8");
             }
@@ -536,7 +526,8 @@ std::vector<std::string> King::getPossibleMoves()
             }
         }
     }
-    return moves;
+
+    return removeUnableMoves(moves);
 }
 
 std::vector<std::string> King::getAttackingSquares()
@@ -634,17 +625,11 @@ std::vector<std::string> Vacant::getPossibleMoves()
 //     Board board = Board();
 //     board.print();
 //     board.move("e2", "e4");
-//     board.print();
 //     board.move("e7", "e5");
+//     board.move("d1", "h5");
 //     board.print();
-//     board.move("g1", "f3");
-//     board.print();
-//     board.move("g8", "f6");
-//     board.print();
-//     board.move("f1", "e2");
-//     board.print();
-//     board.move("f8", "e7");
-//     board.print();
-//     board.move("e1", "g1");
-//     board.print();
+//     std::vector<std::string> moves = board.getPieceAt("f7")->getPossibleMoves();
+//     for(int i = 0; i < moves.size(); i++){
+//         std::cout << moves[i] << std::endl;
+//     }
 // }

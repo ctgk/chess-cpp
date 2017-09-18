@@ -16,6 +16,7 @@ public:
     virtual std::vector<std::string> getPossibleMoves() = 0;
     virtual std::vector<std::string> getAttackingSquares() = 0;
     virtual bool moveTo(std::string destination);
+    std::vector<std::string> removeUnableMoves(std::vector<std::string> moves);
     char const color;
     char const opponentColor;
     std::string const name;
@@ -24,7 +25,6 @@ public:
 protected:
     Board* board;
     std::string position;
-    std::string homePosition;
 };
 
 class Pawn : public Piece
@@ -44,7 +44,7 @@ class Knight : public Piece
 public:
     Knight(char color) : Piece(color, "Knight", (color == 'w' ? 'N' : 'n')){}
     std::vector<std::string> getPossibleMoves();
-    std::vector<std::string> getAttackingSquares() { return getPossibleMoves(); }
+    std::vector<std::string> getAttackingSquares();
 };
 
 class Bishop : public Piece
@@ -52,7 +52,7 @@ class Bishop : public Piece
 public:
     Bishop(char color) : Piece(color, "Bishop", (color == 'w' ? 'B' : 'b')){}
     std::vector<std::string> getPossibleMoves();
-    std::vector<std::string> getAttackingSquares() { return getPossibleMoves(); }
+    std::vector<std::string> getAttackingSquares();
 };
 
 class Rook : public Piece
@@ -60,7 +60,7 @@ class Rook : public Piece
 public:
     Rook(char color) : Piece(color, "Rook", (color == 'w' ? 'R' : 'r')){}
     std::vector<std::string> getPossibleMoves();
-    std::vector<std::string> getAttackingSquares() { return getPossibleMoves(); }
+    std::vector<std::string> getAttackingSquares();
     bool moveTo(std::string destination);
 };
 
@@ -69,7 +69,7 @@ class Queen : public Piece
 public:
     Queen(char color) : Piece(color, "Queen", (color == 'w' ? 'Q' : 'q')){}
     std::vector<std::string> getPossibleMoves();
-    std::vector<std::string> getAttackingSquares() { return getPossibleMoves(); }
+    std::vector<std::string> getAttackingSquares();
 };
 
 class King : public Piece
